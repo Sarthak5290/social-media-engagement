@@ -35,18 +35,15 @@ export default function DashBoard() {
     []
   );
   const [loading, setLoading] = useState(false);
-  const [resData, setResData] = useState("");
   const [recommendations, setRecommendations] = useState<string[]>([]);
 
-  // New state variables for metrics
+  // Metrics state
   const [averageEngagementRate, setAverageEngagementRate] = useState("N/A");
   const [totalInteractions, setTotalInteractions] = useState("N/A");
   const [completionRate, setCompletionRate] = useState("N/A");
   const [swipeThroughRate, setSwipeThroughRate] = useState("N/A");
 
   const extractMetrics = (data: string) => {
-    console.log(resData)
-    // Extract metrics from the response text
     const engagementRateMatch = data.match(
       /Average engagement rate:\s*([\d.]+)%/
     );
@@ -67,8 +64,6 @@ export default function DashBoard() {
   };
 
   const extractRecommendations = (text: string) => {
-    console.log("Extracting recommendations from:", text);
-    // Extract recommendations using regex
     const recommendationsMatch = text.match(/(?<=\d\.\s).+/g);
     setRecommendations(recommendationsMatch || []);
   };
@@ -81,24 +76,23 @@ export default function DashBoard() {
       });
 
       const responseText = res.data;
-      setResData(JSON.stringify(res.data)); // Assume the API returns text content directly
-      extractRecommendations(res.data);
+      extractRecommendations(responseText);
+      extractMetrics(responseText);
 
-      // Call the new extractMetrics function
-      extractMetrics(res.data);
-      console.log("API response text:", responseText);
-
-      // Extract pie chart data based on input
-      if (input === "Image") extractImageData(responseText);
-      else if (input === "Reels") extractReelData(responseText);
-      else if (input === "Video") extractVideoData(responseText);
-      else if (input === "Carousel") extractCarouselData(responseText);
-
-      if (input === "Image") extractImageContentDataBar(responseText);
-      else if (input === "Reels") extractReelContentDataBar(responseText);
-      else if (input === "Video") extractVideoContentDataBar(responseText);
-      else if (input === "Carousel")
+      // Extract chart data based on input type
+      if (input === "Image") {
+        extractImageData(responseText);
+        extractImageContentDataBar(responseText);
+      } else if (input === "Reels") {
+        extractReelData(responseText);
+        extractReelContentDataBar(responseText);
+      } else if (input === "Video") {
+        extractVideoData(responseText);
+        extractVideoContentDataBar(responseText);
+      } else if (input === "Carousel") {
+        extractCarouselData(responseText);
         extractCarouselContentDataBar(responseText);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -106,29 +100,25 @@ export default function DashBoard() {
     }
   };
 
-  // const extractVideoContentData = (data: string) => {
-  //   const regex =
-  //     /Educational content: (\d+\.\d+)% engagement rate|Entertainment content: (\d+\.\d+)% engagement rate|Promotional content: (\d+\.\d+)% engagement rate/g;
-  //   setChartData(
-  //     extractDataUsingRegex(data, regex, [
-  //       "Educational",
-  //       "Entertainment",
-  //       "Promotional",
-  //     ])
-  //   );
-  // };
-
-  // const extractImageContentData = (data: string) => {
-  //   const regex =
-  //     /Text-based images: (\d+\.\d+)% engagement rate|Visual images: (\d+\.\d+)% engagement rate|Interactive images: (\d+\.\d+)% engagement rate/g;
-  //   setChartData(
-  //     extractDataUsingRegex(data, regex, [
-  //       "Text-based",
-  //       "Visual",
-  //       "Interactive",
-  //     ])
-  //   );
-  // };
+  const extractDataUsingRegex = (
+    data: string,
+    regex: RegExp,
+    labels: string[]
+  ) => {
+    const newBrowserData: { name: string; value: number }[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(data)) !== null) {
+      labels.forEach((label, index) => {
+        if (match![index + 1]) {
+          newBrowserData.push({
+            name: label,
+            value: parseFloat(match![index + 1]),
+          });
+        }
+      });
+    }
+    return newBrowserData;
+  };
 
   const extractDataUsingRegexBar = (
     data: string,
@@ -150,6 +140,7 @@ export default function DashBoard() {
     return newChartData;
   };
 
+  // Data extraction functions
   const extractVideoContentDataBar = (data: string) => {
     const regex =
       /Educational content: (\d+\.\d+)% engagement rate|Entertainment content: (\d+\.\d+)% engagement rate|Promotional content: (\d+\.\d+)% engagement rate/g;
@@ -198,26 +189,6 @@ export default function DashBoard() {
     );
   };
 
-  const extractDataUsingRegex = (
-    data: string,
-    regex: RegExp,
-    labels: string[]
-  ) => {
-    const newBrowserData: { name: string; value: number }[] = [];
-    let match: RegExpExecArray | null;
-    while ((match = regex.exec(data)) !== null) {
-      labels.forEach((label, index) => {
-        if (match![index + 1]) {
-          newBrowserData.push({
-            name: label,
-            value: parseFloat(match![index + 1]),
-          });
-        }
-      });
-    }
-    return newBrowserData;
-  };
-
   const extractImageData = (data: string) => {
     const regex =
       /Small images \(less than 500x500 pixels\): (\d+\.\d+)% engagement rate|Medium images \(500x500-1000x1000 pixels\): (\d+\.\d+)% engagement rate|Large images \(more than 1000x1000 pixels\): (\d+\.\d+)% engagement rate/g;
@@ -250,9 +221,10 @@ export default function DashBoard() {
     );
   };
 
+  // Rest of the JSX remains the same...
   return (
     <div>
-      <div className={`min-h-screen bg-zinc-950 text-white p-8 `}>
+      <div className="min-h-screen bg-zinc-950 text-white p-8">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
             <div className="flex flex-col items-center gap-4">
@@ -261,7 +233,9 @@ export default function DashBoard() {
             </div>
           </div>
         )}
-        <div
+
+        {/* Rest of your JSX code... */}
+    <div
           className={`max-w-7xl mx-auto space-y-8 relative ${
             loading ? "blur-sm" : ""
           }`}
@@ -437,7 +411,12 @@ export default function DashBoard() {
             </div>
           </div>
         </div>
+
+
+
+
+        {/* The JSX structure remains exactly the same as in your original code */}
       </div>
     </div>
   );
-}
+};

@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(textMessage);
       }
-    } catch (error : any) {
-      console.error("Main Error", error.message);
+    } catch (error ) {
+      console.error("Main Error", error);
       return NextResponse.json(error)
     }
 
