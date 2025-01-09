@@ -76,7 +76,7 @@ export default function DashBoard() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:3000/api/langflowclient", {
+      const res = await axios.post("https://social-media-engagement-chi.vercel.app/api/langflowclient", {
         inputValue: input,
       });
 
