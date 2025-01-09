@@ -1,12 +1,12 @@
-import Image from "next/image";
-import DashBoard from "./components/DashBoard";
-import Loader from "./components/Loader";
+// import DashBoard from "./components/DashBoard";
+import Home2 from "./components/Home";
+import Navbar from "./components/Navbar";
 
 export default function Home() {
   return (
     <div>
-      <DashBoard />
-     {/* <center><Loader /></center>  */}
+      <Navbar></Navbar>
+      <Home2></Home2>
     </div>
   );
 }
